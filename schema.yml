@@ -1,0 +1,1166 @@
+openapi: 3.0.3
+info:
+  title: HireMind AI API
+  version: 1.0.0
+  description: API para gerenciamento de vagas, currículos e análises de candidatos
+    com IA
+paths:
+  /api/analyses/:
+    get:
+      operationId: analyses_list
+      description: Retorna uma lista paginada de todas as análises de candidatos.
+        Filtre por ?resume={id} ou ?job={id}. Ordene por ?ordering=-score
+      summary: Listar todas as análises
+      parameters:
+      - in: query
+        name: job
+        schema:
+          type: string
+          format: uuid
+      - name: ordering
+        required: false
+        in: query
+        description: Qual campo usar ao ordenar os resultados.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: Um número de página dentro do conjunto de resultados paginado.
+        schema:
+          type: integer
+      - in: query
+        name: resume
+        schema:
+          type: string
+          format: uuid
+      tags:
+      - analyses
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedAnalysisList'
+          description: ''
+  /api/analyses/{id}/:
+    get:
+      operationId: analyses_retrieve
+      description: Retorna os detalhes completos de uma análise específica, incluindo
+        score e recomendações.
+      summary: Obter detalhes da análise
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: Um string UUID que identifica este analysis.
+        required: true
+      tags:
+      - analyses
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Analysis'
+          description: ''
+  /api/jobs/:
+    get:
+      operationId: jobs_list
+      description: Retorna uma lista paginada de todas as vagas cadastradas no sistema.
+      summary: Listar todas as vagas
+      parameters:
+      - in: query
+        name: contract_type
+        schema:
+          type: string
+          enum:
+          - clt
+          - freelance
+          - internship
+          - pj
+          - temporary
+        description: |-
+          * `clt` - CLT
+          * `pj` - PJ
+          * `internship` - Estágio
+          * `freelance` - Freelance
+          * `temporary` - Temporário
+      - in: query
+        name: education_level
+        schema:
+          type: string
+          enum:
+          - associate
+          - bachelors
+          - high_school
+          - masters
+          - none
+          - phd
+        description: |-
+          * `none` - Sem exigência
+          * `high_school` - Ensino Médio
+          * `associate` - Tecnólogo
+          * `bachelors` - Bacharelado
+          * `masters` - Mestrado
+          * `phd` - Doutorado
+      - in: query
+        name: is_active
+        schema:
+          type: boolean
+      - name: ordering
+        required: false
+        in: query
+        description: Qual campo usar ao ordenar os resultados.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: Um número de página dentro do conjunto de resultados paginado.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: Um termo de busca.
+        schema:
+          type: string
+      - in: query
+        name: seniority
+        schema:
+          type: string
+          enum:
+          - apprentice
+          - architect
+          - c_level
+          - coordinator
+          - director
+          - head
+          - intern
+          - junior
+          - manager
+          - mid_level
+          - principal
+          - product_owner
+          - senior
+          - specialist
+          - staff
+          - tech_lead
+          - trainee
+          - vp
+        description: |-
+          * `apprentice` - Jovem Aprendiz
+          * `intern` - Estágio
+          * `trainee` - Trainee
+          * `junior` - Júnior
+          * `mid_level` - Pleno
+          * `senior` - Sênior
+          * `specialist` - Especialista
+          * `staff` - Staff
+          * `principal` - Principal
+          * `tech_lead` - Tech Lead
+          * `architect` - Arquiteto
+          * `coordinator` - Coordenador(a)
+          * `product_owner` - Product Owner
+          * `manager` - Gerente
+          * `head` - Head
+          * `director` - Diretor(a)
+          * `vp` - VP
+          * `c_level` - C-Level (CTO/CIO/CPO)
+      - in: query
+        name: work_model
+        schema:
+          type: string
+          enum:
+          - hybrid
+          - onsite
+          - remote
+        description: |-
+          * `onsite` - Presencial
+          * `remote` - Remoto
+          * `hybrid` - Híbrido
+      tags:
+      - jobs
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedJobList'
+          description: ''
+    post:
+      operationId: jobs_create
+      description: Cria uma nova vaga no sistema.
+      summary: Criar nova vaga
+      tags:
+      - jobs
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JobRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/JobRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/JobRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Job'
+          description: ''
+  /api/jobs/{id}/:
+    get:
+      operationId: jobs_retrieve
+      description: Retorna os detalhes completos de uma vaga específica.
+      summary: Obter detalhes da vaga
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: Um string UUID que identifica este job.
+        required: true
+      tags:
+      - jobs
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Job'
+          description: ''
+    put:
+      operationId: jobs_update
+      description: Atualiza todos os campos de uma vaga existente.
+      summary: Atualizar vaga
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: Um string UUID que identifica este job.
+        required: true
+      tags:
+      - jobs
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JobRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/JobRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/JobRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Job'
+          description: ''
+    patch:
+      operationId: jobs_partial_update
+      description: Atualiza apenas os campos fornecidos de uma vaga existente.
+      summary: Atualizar vaga parcialmente
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: Um string UUID que identifica este job.
+        required: true
+      tags:
+      - jobs
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedJobRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedJobRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedJobRequest'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Job'
+          description: ''
+    delete:
+      operationId: jobs_destroy
+      description: Remove uma vaga do sistema.
+      summary: Deletar vaga
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: Um string UUID que identifica este job.
+        required: true
+      tags:
+      - jobs
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '204':
+          description: No response body
+  /api/jobs/active/:
+    get:
+      operationId: jobs_active_retrieve
+      description: Retorna apenas vagas ativas.
+      tags:
+      - jobs
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Job'
+          description: ''
+  /api/resumes/:
+    get:
+      operationId: resumes_list
+      description: Retorna uma lista paginada de todos os currículos cadastrados no
+        sistema.
+      summary: Listar todos os currículos
+      parameters:
+      - in: query
+        name: job
+        schema:
+          type: string
+          format: uuid
+      - name: ordering
+        required: false
+        in: query
+        description: Qual campo usar ao ordenar os resultados.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: Um número de página dentro do conjunto de resultados paginado.
+        schema:
+          type: integer
+      - in: query
+        name: status
+        schema:
+          type: string
+          enum:
+          - done
+          - error
+          - pending
+          - processing
+        description: |-
+          * `pending` - Pendente
+          * `processing` - Processando
+          * `done` - Concluído
+          * `error` - Erro
+      tags:
+      - resumes
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedResumeList'
+          description: ''
+    post:
+      operationId: resumes_create
+      description: Faz upload de um novo currículo (PDF ou DOCX) para o sistema.
+      summary: Upload de currículo
+      tags:
+      - resumes
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResumeRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ResumeRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ResumeRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Resume'
+          description: ''
+  /api/resumes/{id}/:
+    get:
+      operationId: resumes_retrieve
+      description: Retorna os detalhes completos de um currículo específico.
+      summary: Obter detalhes do currículo
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: Um string UUID que identifica este resume.
+        required: true
+      tags:
+      - resumes
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Resume'
+          description: ''
+    put:
+      operationId: resumes_update
+      description: Atualiza todos os campos de um currículo existente.
+      summary: Atualizar currículo
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: Um string UUID que identifica este resume.
+        required: true
+      tags:
+      - resumes
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResumeRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ResumeRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ResumeRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Resume'
+          description: ''
+    patch:
+      operationId: resumes_partial_update
+      description: Atualiza apenas os campos fornecidos de um currículo existente.
+      summary: Atualizar currículo parcialmente
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: Um string UUID que identifica este resume.
+        required: true
+      tags:
+      - resumes
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedResumeRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedResumeRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedResumeRequest'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Resume'
+          description: ''
+    delete:
+      operationId: resumes_destroy
+      description: Remove um currículo do sistema.
+      summary: Deletar currículo
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: Um string UUID que identifica este resume.
+        required: true
+      tags:
+      - resumes
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '204':
+          description: No response body
+  /api/resumes/{id}/analyze/:
+    post:
+      operationId: resumes_analyze_create
+      description: Executa análise de IA deste currículo para uma vaga específica.
+      summary: Analisar currículo
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: Um string UUID que identifica este resume.
+        required: true
+      tags:
+      - resumes
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                job_id:
+                  type: integer
+                  example: 1
+                  description: ID da vaga para análise
+              required:
+              - job_id
+            examples:
+              ExemploDeRequisição:
+                value:
+                  job_id: 1
+                summary: Exemplo de requisição
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Analysis'
+          description: ''
+        '400':
+          description: job_id é obrigatório
+        '404':
+          description: Job não encontrado
+        '500':
+          description: Erro ao processar análise
+components:
+  schemas:
+    Analysis:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        resume:
+          type: string
+          format: uuid
+          readOnly: true
+        job:
+          type: string
+          format: uuid
+          readOnly: true
+        candidate_name:
+          type: string
+          readOnly: true
+        job_title:
+          type: string
+          readOnly: true
+        seniority:
+          type: string
+          readOnly: true
+        years_experience:
+          type: number
+          format: double
+          readOnly: true
+        skills:
+          readOnly: true
+        matched_skills:
+          readOnly: true
+        missing_skills:
+          readOnly: true
+        summary:
+          type: string
+          readOnly: true
+        score:
+          type: number
+          format: double
+          readOnly: true
+          description: 0-100 fit score
+        strengths:
+          readOnly: true
+        weaknesses:
+          readOnly: true
+        interview_questions:
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - candidate_name
+      - created_at
+      - id
+      - interview_questions
+      - job
+      - job_title
+      - matched_skills
+      - missing_skills
+      - resume
+      - score
+      - seniority
+      - skills
+      - strengths
+      - summary
+      - weaknesses
+      - years_experience
+    BlankEnum:
+      enum:
+      - ''
+    ContractTypeEnum:
+      enum:
+      - clt
+      - pj
+      - internship
+      - freelance
+      - temporary
+      type: string
+      description: |-
+        * `clt` - CLT
+        * `pj` - PJ
+        * `internship` - Estágio
+        * `freelance` - Freelance
+        * `temporary` - Temporário
+    EducationLevelEnum:
+      enum:
+      - none
+      - high_school
+      - associate
+      - bachelors
+      - masters
+      - phd
+      type: string
+      description: |-
+        * `none` - Sem exigência
+        * `high_school` - Ensino Médio
+        * `associate` - Tecnólogo
+        * `bachelors` - Bacharelado
+        * `masters` - Mestrado
+        * `phd` - Doutorado
+    Job:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        title:
+          type: string
+          maxLength: 200
+        description:
+          type: string
+          description: Descrição detalhada da vaga, responsabilidades, etc.
+        required_skills:
+          type: string
+        nice_to_have:
+          type: string
+        seniority:
+          $ref: '#/components/schemas/SeniorityEnum'
+        work_model:
+          $ref: '#/components/schemas/WorkModelEnum'
+        location:
+          type: string
+          description: Cidade/Estado ou 'Remoto'
+          maxLength: 100
+        contract_type:
+          $ref: '#/components/schemas/ContractTypeEnum'
+        min_experience_years:
+          type: number
+          format: double
+          description: Anos mínimos de experiência
+        languages:
+          type: string
+          description: Idiomas requeridos
+          maxLength: 200
+        education_level:
+          oneOf:
+          - $ref: '#/components/schemas/EducationLevelEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        salary_min:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+          nullable: true
+        salary_max:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+          nullable: true
+        salary_visible:
+          type: boolean
+        benefits:
+          type: string
+          description: Benefícios oferecidos
+        openings:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        application_deadline:
+          type: string
+          format: date
+          nullable: true
+        department:
+          type: string
+          maxLength: 100
+        is_active:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - description
+      - id
+      - title
+      - updated_at
+    JobRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+        description:
+          type: string
+          minLength: 1
+          description: Descrição detalhada da vaga, responsabilidades, etc.
+        required_skills:
+          type: string
+        nice_to_have:
+          type: string
+        seniority:
+          $ref: '#/components/schemas/SeniorityEnum'
+        work_model:
+          $ref: '#/components/schemas/WorkModelEnum'
+        location:
+          type: string
+          description: Cidade/Estado ou 'Remoto'
+          maxLength: 100
+        contract_type:
+          $ref: '#/components/schemas/ContractTypeEnum'
+        min_experience_years:
+          type: number
+          format: double
+          description: Anos mínimos de experiência
+        languages:
+          type: string
+          description: Idiomas requeridos
+          maxLength: 200
+        education_level:
+          oneOf:
+          - $ref: '#/components/schemas/EducationLevelEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        salary_min:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+          nullable: true
+        salary_max:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+          nullable: true
+        salary_visible:
+          type: boolean
+        benefits:
+          type: string
+          description: Benefícios oferecidos
+        openings:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        application_deadline:
+          type: string
+          format: date
+          nullable: true
+        department:
+          type: string
+          maxLength: 100
+        is_active:
+          type: boolean
+      required:
+      - description
+      - title
+    PaginatedAnalysisList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Analysis'
+    PaginatedJobList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Job'
+    PaginatedResumeList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Resume'
+    PatchedJobRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+        description:
+          type: string
+          minLength: 1
+          description: Descrição detalhada da vaga, responsabilidades, etc.
+        required_skills:
+          type: string
+        nice_to_have:
+          type: string
+        seniority:
+          $ref: '#/components/schemas/SeniorityEnum'
+        work_model:
+          $ref: '#/components/schemas/WorkModelEnum'
+        location:
+          type: string
+          description: Cidade/Estado ou 'Remoto'
+          maxLength: 100
+        contract_type:
+          $ref: '#/components/schemas/ContractTypeEnum'
+        min_experience_years:
+          type: number
+          format: double
+          description: Anos mínimos de experiência
+        languages:
+          type: string
+          description: Idiomas requeridos
+          maxLength: 200
+        education_level:
+          oneOf:
+          - $ref: '#/components/schemas/EducationLevelEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        salary_min:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+          nullable: true
+        salary_max:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+          nullable: true
+        salary_visible:
+          type: boolean
+        benefits:
+          type: string
+          description: Benefícios oferecidos
+        openings:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        application_deadline:
+          type: string
+          format: date
+          nullable: true
+        department:
+          type: string
+          maxLength: 100
+        is_active:
+          type: boolean
+    PatchedResumeRequest:
+      type: object
+      properties:
+        candidate_name:
+          type: string
+          maxLength: 200
+        candidate_email:
+          type: string
+          format: email
+          maxLength: 254
+        file:
+          type: string
+          format: binary
+        job:
+          type: string
+          format: uuid
+          nullable: true
+    Resume:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        candidate_name:
+          type: string
+          maxLength: 200
+        candidate_email:
+          type: string
+          format: email
+          maxLength: 254
+        file:
+          type: string
+          format: uri
+        status:
+          allOf:
+          - $ref: '#/components/schemas/StatusEnum'
+          readOnly: true
+        status_detail:
+          type: string
+          readOnly: true
+        job:
+          type: string
+          format: uuid
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - file
+      - id
+      - status
+      - status_detail
+      - updated_at
+    ResumeRequest:
+      type: object
+      properties:
+        candidate_name:
+          type: string
+          maxLength: 200
+        candidate_email:
+          type: string
+          format: email
+          maxLength: 254
+        file:
+          type: string
+          format: binary
+        job:
+          type: string
+          format: uuid
+          nullable: true
+      required:
+      - file
+    SeniorityEnum:
+      enum:
+      - apprentice
+      - intern
+      - trainee
+      - junior
+      - mid_level
+      - senior
+      - specialist
+      - staff
+      - principal
+      - tech_lead
+      - architect
+      - coordinator
+      - product_owner
+      - manager
+      - head
+      - director
+      - vp
+      - c_level
+      type: string
+      description: |-
+        * `apprentice` - Jovem Aprendiz
+        * `intern` - Estágio
+        * `trainee` - Trainee
+        * `junior` - Júnior
+        * `mid_level` - Pleno
+        * `senior` - Sênior
+        * `specialist` - Especialista
+        * `staff` - Staff
+        * `principal` - Principal
+        * `tech_lead` - Tech Lead
+        * `architect` - Arquiteto
+        * `coordinator` - Coordenador(a)
+        * `product_owner` - Product Owner
+        * `manager` - Gerente
+        * `head` - Head
+        * `director` - Diretor(a)
+        * `vp` - VP
+        * `c_level` - C-Level (CTO/CIO/CPO)
+    StatusEnum:
+      enum:
+      - pending
+      - processing
+      - done
+      - error
+      type: string
+      description: |-
+        * `pending` - Pendente
+        * `processing` - Processando
+        * `done` - Concluído
+        * `error` - Erro
+    WorkModelEnum:
+      enum:
+      - onsite
+      - remote
+      - hybrid
+      type: string
+      description: |-
+        * `onsite` - Presencial
+        * `remote` - Remoto
+        * `hybrid` - Híbrido
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sessionid
+servers:
+- url: http://localhost:8000
+  description: Servidor de Desenvolvimento
+tags:
+- name: jobs
+  description: Operações relacionadas a vagas
+- name: resumes
+  description: Operações relacionadas a currículos
+- name: analyses
+  description: Operações relacionadas a análises de candidatos

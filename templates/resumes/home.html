@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="hero p-5 mb-4">
+        <h1 class="display-5 fw-bold"><i class="bi bi-stars"></i> Análise de Currículos com IA</h1>
+        <p class="lead mb-4">Envie currículos em PDF/DOCX, receba score de aderência, resumo profissional, perguntas
+            técnicas e ranking de candidatos — tudo via LangChain + RAG (ChromaDB) + OpenAI.</p>
+        <a class="btn btn-light btn-lg me-2" href="{% url 'resumes:resume-upload' %}"><i class="bi bi-upload"></i>
+            Enviar Currículo</a>
+        <a class="btn btn-outline-light btn-lg" href="{% url 'resumes:job-create' %}"><i class="bi bi-plus-circle"></i>
+            Nova Vaga</a>
+    </div>
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-body"><h6 class="text-muted">Vagas</h6>
+                    <h2>{{ jobs_count }}</h2></div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-body"><h6 class="text-muted">Currículos</h6>
+                    <h2>{{ resumes_count }}</h2></div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-body"><h6 class="text-muted">Análises</h6>
+                    <h2>{{ analyses_count }}</h2></div>
+            </div>
+        </div>
+    </div>
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-white"><strong>Análises recentes</strong></div>
+        <div class="list-group list-group-flush">
+            {% for a in recent_analyses %}
+                <a class="list-group-item list-group-item-action" href="{% url 'resumes:analysis-detail' a.pk %}">
+                    <div class="d-flex justify-content-between">
+                        <span><i
+                                class="bi bi-person"></i> {{ a.resume.candidate_name|default:"(sem nome)" }} → <strong>{{ a.job.title }}</strong></span>
+                        <span class="badge rounded-pill score-pill {% if a.score >= 75 %}score-high{% elif a.score >= 50 %}score-mid{% else %}score-low{% endif %}">{{ a.score|floatformat:1 }}</span>
+                    </div>
+                </a>
+            {% empty %}
+                <div class="list-group-item text-muted">Nenhuma análise ainda.</div>{% endfor %}
+        </div>
+    </div>
+{% endblock %}
+

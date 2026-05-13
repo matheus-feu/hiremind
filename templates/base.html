@@ -1,0 +1,22 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    {% include 'partials/_head.html' %}
+</head>
+<body>
+    {% include 'partials/_navbar.html' %}
+
+    <main class="container pb-5">
+        {% include 'partials/_messages.html' %}
+        {% block content %}{% endblock %}
+    </main>
+
+    {% include 'partials/_footer.html' %}
+    {% include 'partials/_scripts.html' %}
+</body>
+</html>
+
+
+

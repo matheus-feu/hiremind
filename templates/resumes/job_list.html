@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<link href="{% static 'resumes/css/job_list.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div id="jobs-page-container">
+    <!-- Header -->
+    <div id="jobs-header" class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h2><i class="bi bi-briefcase"></i> Vagas</h2>
+            <small class="text-muted">{{ total_jobs }} vaga(s) encontrada(s) | {{ active_jobs }} ativa(s)</small>
+        </div>
+        <a class="btn btn-primary" href="{% url 'resumes:job-create' %}">
+            <i class="bi bi-plus-lg"></i> Nova Vaga
+        </a>
+    </div>
+    <!-- Filtros (via partial) -->
+    {% include 'partials/_job_filters.html' %}
+    <!-- Tabela com Scroll -->
+    <div id="jobs-table-container" class="card shadow-sm border-0">
+        <div class="table-responsive h-100">
+            <table class="table table-hover mb-0 align-middle">
+                <thead class="table-light">
+                <tr>
+                    <th>
+                        <a href="?ordering=title&{{ query_string }}" class="text-decoration-none text-dark">
+                            Título {% if request.GET.ordering == "title" %}<i class="bi bi-arrow-up"></i>{% endif %}
+                        </a>
+                    </th>
+                    <th>Senioridade</th>
+                    <th>Modelo</th>
+                    <th>Status</th>
+                    <th>
+                        <a href="?ordering=-created_at&{{ query_string }}" class="text-decoration-none text-dark">
+                            Candidatos {% if request.GET.ordering == "-created_at" %}<i class="bi bi-arrow-down"></i>{% endif %}
+                        </a>
+                    </th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for job in jobs %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'resumes:job-detail' job.pk %}" class="fw-semibold">{{ job.title }}</a>
+                            {% if job.location %}
+                                <br><small class="text-muted"><i class="bi bi-geo-alt"></i> {{ job.location }}</small>
+                            {% endif %}
+                        </td>
+                        <td><span class="badge bg-info">{{ job.get_seniority_display }}</span></td>
+                        <td>
+                            {% include 'partials/_work_model_badge.html' %}
+                        </td>
+                        <td>
+                            {% include 'partials/_job_status_badge.html' %}
+                        </td>
+                        <td>
+                            <span class="badge bg-primary">{{ job.resumes.count }}</span>
+                        </td>
+                        <td class="text-end">
+                            <a class="btn btn-sm btn-outline-primary" href="{% url 'resumes:job-detail' job.pk %}" title="Ver detalhes">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            <a class="btn btn-sm btn-outline-secondary" href="{% url 'resumes:job-edit' job.pk %}" title="Editar">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center text-muted py-4">
+                            <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                            Nenhuma vaga encontrada com os filtros aplicados.
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <!-- Paginação (via partial) -->
+    {% include 'partials/_pagination.html' %}
+</div>
+{% endblock %}

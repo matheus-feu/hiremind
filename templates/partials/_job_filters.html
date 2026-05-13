@@ -1,0 +1,94 @@
+<!-- Filtros de Listagem de Vagas -->
+<div id="jobs-filters" class="card shadow-sm border-0 mb-3">
+    <div class="card-body py-2">
+        <form method="get" id="filterForm">
+            <div class="row g-2">
+                <!-- Busca por título -->
+                <div class="col-md-3">
+                    <label for="search" class="form-label small text-muted mb-1">
+                        <i class="bi bi-search"></i> Buscar por título
+                    </label>
+                    <input type="text"
+                           class="form-control form-control-sm"
+                           id="search"
+                           name="search"
+                           placeholder="Ex: Backend Python"
+                           value="{{ request.GET.search }}">
+                </div>
+
+                <!-- Status -->
+                <div class="col-md-2">
+                    <label for="status" class="form-label small text-muted mb-1">
+                        <i class="bi bi-toggle-on"></i> Status
+                    </label>
+                    <select class="form-select form-select-sm" id="status" name="status">
+                        <option value="">Todas</option>
+                        <option value="active" {% if request.GET.status == "active" %}selected{% endif %}>Ativas
+                        </option>
+                        <option value="inactive" {% if request.GET.status == "inactive" %}selected{% endif %}>Inativas
+                        </option>
+                    </select>
+                </div>
+
+                <!-- Senioridade -->
+                <div class="col-md-2">
+                    <label for="seniority" class="form-label small text-muted mb-1">
+                        <i class="bi bi-bar-chart-steps"></i> Senioridade
+                    </label>
+                    <select class="form-select form-select-sm" id="seniority" name="seniority">
+                        <option value="">Todas</option>
+                        {% for value, label in seniority_choices %}
+                            <option value="{{ value }}"
+                                    {% if request.GET.seniority == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Modelo de trabalho -->
+                <div class="col-md-2">
+                    <label for="work_model" class="form-label small text-muted mb-1">
+                        <i class="bi bi-house-door"></i> Modelo
+                    </label>
+                    <select class="form-select form-select-sm" id="work_model" name="work_model">
+                        <option value="">Todos</option>
+                        {% for value, label in work_model_choices %}
+                            <option value="{{ value }}"
+                                    {% if request.GET.work_model == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Tipo de contrato -->
+                <div class="col-md-2">
+                    <label for="contract_type" class="form-label small text-muted mb-1">
+                        <i class="bi bi-file-text"></i> Contrato
+                    </label>
+                    <select class="form-select form-select-sm" id="contract_type" name="contract_type">
+                        <option value="">Todos</option>
+                        {% for value, label in contract_type_choices %}
+                            <option value="{{ value }}"
+                                    {% if request.GET.contract_type == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Botão de busca -->
+                <div class="col-md-1 d-flex align-items-end">
+                    <button type="submit" class="btn btn-sm btn-primary w-100" title="Filtrar">
+                        <i class="bi bi-funnel"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Botão limpar filtros (aparece apenas quando há filtros ativos) -->
+            {% if request.GET.search or request.GET.status or request.GET.seniority or request.GET.work_model or request.GET.contract_type %}
+                <div class="mt-2">
+                    <a href="{% url 'resumes:job-list' %}" class="btn btn-sm btn-outline-secondary">
+                        <i class="bi bi-x-circle"></i> Limpar filtros
+                    </a>
+                </div>
+            {% endif %}
+        </form>
+    </div>
+</div>
+

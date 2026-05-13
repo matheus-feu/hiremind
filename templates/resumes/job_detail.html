@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h2 class="mb-0">{{ job.title }}</h2>
+            <small class="text-muted">{{ job.get_seniority_display }} · criada
+                em {{ job.created_at|date:"d/m/Y H:i" }}</small>
+        </div>
+        <div>
+            <a class="btn btn-outline-secondary" href="{% url 'resumes:job-edit' job.pk %}"><i class="bi bi-pencil"></i>
+                Editar</a>
+            <a class="btn btn-outline-danger" href="{% url 'resumes:job-delete' job.pk %}"><i
+                    class="bi bi-trash"></i></a>
+        </div>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-lg-5">
+            <div class="card shadow-sm border-0 mb-3">
+                <div class="card-header bg-white"><strong>Descrição</strong></div>
+                <div class="card-body rich-text">{{ job.description|safe }}</div>
+            </div>
+            <div class="card shadow-sm border-0 mb-3">
+                <div class="card-header bg-white"><strong>Skills</strong></div>
+                <div class="card-body">
+                    <h6>Obrigatórias</h6>
+                    <p>{% for s in job.required_skills_list %}
+                        <span class="badge bg-primary me-1">{{ s }}</span>{% empty %}
+                        <span class="text-muted">—</span>{% endfor %}</p>
+                    <h6>Desejáveis</h6>
+                    <p>{% for s in job.nice_to_have_list %}
+                        <span class="badge bg-info text-dark me-1">{{ s }}</span>{% empty %}
+                        <span class="text-muted">—</span>{% endfor %}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-7">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white d-flex justify-content-between">
+                    <strong><i class="bi bi-trophy"></i> Ranking de candidatos</strong>
+                    <a class="btn btn-sm btn-primary" href="{% url 'resumes:resume-upload' %}">+ Currículo</a>
+                </div>
+                <table class="table table-hover mb-0 align-middle">
+                    <thead class="table-light">
+                    <tr>
+                        <th>#</th>
+                        <th>Candidato</th>
+                        <th>Senioridade</th>
+                        <th>Score</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for analysis in ranking %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>
+                                <strong>{{ analysis.resume.candidate_name|default:"(sem nome)" }}</strong><br>
+                                <small class="text-muted">{{ analysis.resume.candidate_email }}</small>
+                            </td>
+                            <td>{{ analysis.seniority|default:"—" }}</td>
+                            <td><span
+                                    class="badge rounded-pill score-pill {% if analysis.score >= 75 %}score-high{% elif analysis.score >= 50 %}score-mid{% else %}score-low{% endif %}">{{ analysis.score|floatformat:1 }}</span>
+                            </td>
+                            <td><a class="btn btn-sm btn-outline-primary"
+                                   href="{% url 'resumes:analysis-detail' analysis.pk %}"><i
+                                    class="bi bi-eye"></i></a></td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center text-muted py-4">Sem análises para esta vaga.</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+

@@ -1,0 +1,75 @@
+<!-- Paginação -->
+{% if is_paginated %}
+    <div id="jobs-pagination" class="py-2 px-3">
+        <nav aria-label="Navegação de páginas">
+            <ul class="pagination pagination-sm mb-0 justify-content-center">
+                <!-- Primeira página -->
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1&{{ query_string }}" aria-label="Primeira página">
+                            <i class="bi bi-chevron-double-left"></i>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}&{{ query_string }}"
+                           aria-label="Página anterior">
+                            <i class="bi bi-chevron-left"></i>
+                        </a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link"><i class="bi bi-chevron-double-left"></i></span>
+                    </li>
+                    <li class="page-item disabled">
+                        <span class="page-link"><i class="bi bi-chevron-left"></i></span>
+                    </li>
+                {% endif %}
+
+                <!-- Números de página (mostra ±3 da página atual) -->
+                {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                        <li class="page-item active" aria-current="page">
+                            <span class="page-link">{{ num }}</span>
+                        </li>
+                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ num }}&{{ query_string }}">{{ num }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+
+                <!-- Última página -->
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}&{{ query_string }}"
+                           aria-label="Próxima página">
+                            <i class="bi bi-chevron-right"></i>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}&{{ query_string }}"
+                           aria-label="Última página">
+                            <i class="bi bi-chevron-double-right"></i>
+                        </a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link"><i class="bi bi-chevron-right"></i></span>
+                    </li>
+                    <li class="page-item disabled">
+                        <span class="page-link"><i class="bi bi-chevron-double-right"></i></span>
+                    </li>
+                {% endif %}
+            </ul>
+
+            <!-- Informação de posição -->
+            <div class="text-center mt-1">
+                <small class="text-muted">
+                    Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+                    ({{ page_obj.start_index }}-{{ page_obj.end_index }} de {{ page_obj.paginator.count }} vagas)
+                </small>
+            </div>
+        </nav>
+    </div>
+{% endif %}
+

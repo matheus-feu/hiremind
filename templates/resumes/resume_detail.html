@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+{% block content %}
+    {# ========== CABEÇALHO ========== #}
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h2 class="mb-0">
+                <i class="bi bi-file-earmark-person"></i> 
+                {{ resume.candidate_name|default:"Currículo sem nome" }}
+            </h2>
+            <small class="text-muted">
+                {% if resume.candidate_email %}{{ resume.candidate_email }} · {% endif %}
+                {{ resume.created_at|date:"d/m/Y H:i" }}
+            </small>
+        </div>
+        <div>
+            <a class="btn btn-outline-secondary" href="{{ resume.file.url }}" target="_blank">
+                <i class="bi bi-download"></i> Baixar
+            </a>
+            <a class="btn btn-outline-danger" href="{% url 'resumes:resume-delete' resume.pk %}">
+                <i class="bi bi-trash"></i>
+            </a>
+        </div>
+    </div>
+    {# ========== STATUS ========== #}
+    <div class="alert alert-{% if resume.status == 'done' %}success{% elif resume.status == 'error' %}danger{% elif resume.status == 'processing' %}warning{% else %}secondary{% endif %} mb-3">
+        Status: <strong>{{ resume.get_status_display }}</strong>
+        {% if resume.status_detail %}<br><small class="text-muted">{{ resume.status_detail }}</small>{% endif %}
+    </div>
+    {# ========== GRID PRINCIPAL - 3 COLUNAS EQUILIBRADAS ========== #}
+    <div class="row g-3">
+        {# COLUNA 1: Texto Extraído (40%) #}
+        <div class="col-lg-5">
+            <div class="card shadow-sm border-0" style="height: 650px;">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <strong><i class="bi bi-file-text"></i> Texto Extraído</strong>
+                    {% if resume.raw_text %}
+                        <span class="badge bg-secondary">{{ resume.raw_text|length }} caracteres</span>
+                    {% endif %}
+                </div>
+                <div class="card-body" style="max-height: 595px; overflow-y: auto;">
+                    {% if resume.raw_text %}
+                        <pre class="raw-text mb-0">{{ resume.raw_text }}</pre>
+                    {% else %}
+                        <p class="text-muted text-center py-5">(ainda sem texto extraído)</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {# COLUNA 2: Análises e Vagas (33%) #}
+        <div class="col-lg-4">
+            {# Análises Realizadas #}
+            <div class="card shadow-sm border-0 mb-3" style="height: 315px;">
+                <div class="card-header bg-white">
+                    <strong><i class="bi bi-clipboard-check"></i> Análises ({{ analyses|length }})</strong>
+                </div>
+                <div style="max-height: 260px; overflow-y: auto;">
+                    {% if analyses %}
+                        <ul class="list-group list-group-flush">
+                            {% for a in analyses %}
+                                <a class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" 
+                                   href="{% url 'resumes:analysis-detail' a.pk %}">
+                                    <span style="flex: 1; overflow: hidden;">{{ a.job.title }}</span>
+                                    <span class="badge rounded-pill score-pill ms-2 {% if a.score >= 75 %}score-high{% elif a.score >= 50 %}score-mid{% else %}score-low{% endif %}">
+                                        {{ a.score|floatformat:1 }}
+                                    </span>
+                                </a>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <div class="card-body text-muted text-center">Sem análises.</div>
+                    {% endif %}
+                </div>
+            </div>
+            {# Analisar com Vaga #}
+            <div class="card shadow-sm border-0 mb-3" style="height: 220px;">
+                <div class="card-header bg-white">
+                    <strong><i class="bi bi-cpu"></i> Analisar com Vaga</strong>
+                </div>
+                <div class="card-body" style="max-height: 165px; overflow-y: auto;">
+                    {% if jobs %}
+                        {% for j in jobs %}
+                            <form method="post" action="{% url 'resumes:resume-analyze' resume.pk j.pk %}" 
+                                  class="d-flex justify-content-between align-items-center mb-2">
+                                {% csrf_token %}
+                                <span style="flex: 1; overflow: hidden;">
+                                    <i class="bi bi-briefcase"></i> {{ j.title }}
+                                </span>
+                                <button type="submit" class="btn btn-sm btn-primary ms-2">
+                                    <i class="bi bi-play-fill"></i> Analisar
+                                </button>
+                            </form>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted text-center mb-0">Nenhuma vaga ativa.</p>
+                    {% endif %}
+                </div>
+            </div>
+            {# Perfil do Candidato #}
+            <div class="card shadow-sm border-0" style="height: 112px;">
+                <div class="card-header bg-white">
+                    <strong><i class="bi bi-person-badge"></i> Perfil Identificado</strong>
+                </div>
+                <div class="card-body">
+                    {% if analyses %}
+                        {% with best=analyses.0 %}
+                            <div class="row">
+                                <div class="col-6">
+                                    <small><strong>Senioridade:</strong><br>{{ best.seniority|capfirst|default:"—" }}</small>
+                                </div>
+                                <div class="col-6">
+                                    <small><strong>Experiência:</strong><br>{{ best.years_experience|floatformat:1 }} anos</small>
+                                </div>
+                            </div>
+                        {% endwith %}
+                    {% else %}
+                        <p class="text-muted text-center mb-0 small">Execute uma análise</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {# COLUNA 3: Skills e Informações (27%) #}
+        <div class="col-lg-3">
+            {# Skills Detectadas #}
+            <div class="card shadow-sm border-0 mb-3" style="height: 380px;">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <strong><i class="bi bi-tools"></i> Skills</strong>
+                    {% if all_skills %}
+                        <span class="badge bg-primary">{{ all_skills|length }}</span>
+                    {% endif %}
+                </div>
+                <div class="card-body" style="max-height: 350px; overflow-y: auto;">
+                    {% if all_skills %}
+                        {% for skill in all_skills %}
+                            <span class="badge bg-primary me-1 mb-1">{{ skill }}</span>
+                        {% endfor %}
+                    {% elif analyses %}
+                        <p class="text-muted text-center mb-0">Nenhuma skill detectada</p>
+                    {% else %}
+                        <p class="text-muted text-center mb-0">Execute uma análise para detectar skills</p>
+                    {% endif %}
+                </div>
+            </div>
+            {# Informações do Arquivo #}
+            <div class="card shadow-sm border-0" style="height: 284px;">
+                <div class="card-header bg-white">
+                    <strong><i class="bi bi-info-circle"></i> Informações</strong>
+                </div>
+                <div class="card-body">
+                    <p class="mb-2">
+                        <strong>Arquivo:</strong><br>
+                        <small class="text-muted d-block text-break" style="font-size: 0.8rem;">
+                            {{ resume.file.name|default:"-" }}
+                        </small>
+                    </p>
+                    <p class="mb-2">
+                        <strong>Tamanho:</strong> 
+                        <small>{{ resume.file.size|filesizeformat|default:"-" }}</small>
+                    </p>
+                    <p class="mb-2">
+                        <strong>Enviado:</strong><br>
+                        <small>{{ resume.created_at|date:"d/m/Y H:i" }}</small>
+                    </p>
+                    <p class="mb-2">
+                        <strong>Atualizado:</strong><br>
+                        <small>{{ resume.updated_at|date:"d/m/Y H:i" }}</small>
+                    </p>
+                    <p class="mb-0">
+                        <strong>Total de Análises:</strong> 
+                        <span class="badge bg-info">{{ analyses|length }}</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

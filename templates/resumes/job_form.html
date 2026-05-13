@@ -1,0 +1,183 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags static %}
+
+{% block title %}{% if object %}Editar{% else %}Nova{% endif %} Vaga · HireMind AI{% endblock %}
+
+{% block extra_css %}
+<link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
+<style>
+    /* Tom Select - ajustes visuais */
+    .ts-control {
+        min-height: 42px;
+        padding: 0.375rem 0.75rem;
+    }
+
+    .ts-control input {
+        font-size: 1rem;
+    }
+
+    /* Esconde o input original completamente */
+    input.skills-tagger.ts-hidden-accessible,
+    input.skills-tagger.tomselected {
+        position: absolute !important;
+        left: -9999px !important;
+        width: 1px !important;
+        height: 1px !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+    }
+
+    /* Wrapper ocupa 100% */
+    .ts-wrapper {
+        width: 100% !important;
+    }
+
+    /* Tags (items selecionados) com visual melhorado */
+    .ts-control .item {
+        background: #0d6efd;
+        color: white;
+        border-radius: 0.25rem;
+        padding: 0.25rem 0.5rem;
+        margin: 0.125rem;
+        font-size: 0.875rem;
+    }
+
+    /* Botão de remover tag */
+    .ts-control .item .remove {
+        color: rgba(255, 255, 255, 0.8);
+        margin-left: 0.25rem;
+        border: none;
+    }
+
+    .ts-control .item .remove:hover {
+        color: white;
+    }
+
+    /* Dropdown de sugestões */
+    .ts-dropdown {
+        border: 1px solid #dee2e6;
+        border-radius: 0.375rem;
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    }
+
+    .ts-dropdown .option {
+        padding: 0.5rem 0.75rem;
+    }
+
+    .ts-dropdown .option.active {
+        background: #0d6efd;
+        color: white;
+    }
+
+    /* Opção "Adicionar nova" */
+    .ts-dropdown .create {
+        padding: 0.5rem 0.75rem;
+        color: #0d6efd;
+        font-weight: 500;
+    }
+
+    .ts-dropdown .create:hover {
+        background: #e7f1ff;
+    }
+
+    /* Mensagem "Nenhum resultado" */
+    .ts-dropdown .no-results {
+        padding: 0.75rem;
+        text-align: center;
+        color: #6c757d;
+        font-style: italic;
+    }
+
+    .django-ckeditor-widget,
+    .cke_chrome {
+        display: block !important;
+        width: 100% !important;
+        box-sizing: border-box;
+    }
+
+    .section-header {
+        font-size: .85rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        color: #6c757d;
+        margin-top: 1.5rem;
+        margin-bottom: .75rem;
+        padding-bottom: .25rem;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .section-header:first-child {
+        margin-top: 0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<h2 class="mb-3">
+    <i class="bi bi-briefcase"></i>
+    {% if object %}Editar{% else %}Nova{% endif %} Vaga
+</h2>
+
+<div class="card shadow-sm border-0">
+    <div class="card-body">
+        {{ form.media }}
+        <form method="post" novalidate>{% csrf_token %}
+            {% if form.non_field_errors %}
+                <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+            {% endif %}
+
+            {# Identificação #}
+            <div class="section-header">📋 Identificação</div>
+            <div class="row g-3">
+                <div class="col-md-8">{{ form.title|as_crispy_field }}</div>
+                <div class="col-md-4">{{ form.seniority|as_crispy_field }}</div>
+            </div>
+
+            {# Modalidade e Localização #}
+            <div class="section-header">🌍 Modalidade e Localização</div>
+            <div class="row g-3">
+                <div class="col-md-4">{{ form.work_model|as_crispy_field }}</div>
+                <div class="col-md-4">{{ form.location|as_crispy_field }}</div>
+                <div class="col-md-4">{{ form.contract_type|as_crispy_field }}</div>
+            </div>
+
+            {# Requisitos #}
+            <div class="section-header">🎯 Requisitos</div>
+            <div class="row g-3">
+                <div class="col-md-4">{{ form.min_experience_years|as_crispy_field }}</div>
+                <div class="col-md-4">{{ form.languages|as_crispy_field }}</div>
+                <div class="col-md-4">{{ form.education_level|as_crispy_field }}</div>
+                <div class="col-md-6">{{ form.required_skills|as_crispy_field }}</div>
+                <div class="col-md-6">{{ form.nice_to_have|as_crispy_field }}</div>
+            </div>
+
+            {# Remuneração e Benefícios #}
+            <div class="section-header">💰 Remuneração e Benefícios</div>
+            <div class="row g-3">
+                <div class="col-md-4">{{ form.salary_min|as_crispy_field }}</div>
+                <div class="col-md-4">{{ form.salary_max|as_crispy_field }}</div>
+                <div class="col-md-4">{{ form.openings|as_crispy_field }}</div>
+                <div class="col-12">{{ form.salary_visible|as_crispy_field }}</div>
+                <div class="col-12">{{ form.benefits|as_crispy_field }}</div>
+            </div>
+
+            {# Descrição #}
+            <div class="section-header">📝 Descrição</div>
+            {{ form.description|as_crispy_field }}
+
+            {# Status #}
+            <div class="mt-3">{{ form.is_active|as_crispy_field }}</div>
+
+            <hr class="my-4">
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-check2"></i> Salvar
+            </button>
+            <a href="{% url 'resumes:job-list' %}" class="btn btn-outline-secondary">Cancelar</a>
+        </form>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js" defer></script>
+<script src="{% static 'resumes/js/skills_tagger.js' %}" defer></script>
+{% endblock %}
+

@@ -1,0 +1,119 @@
+html, body {
+    height: 100vh;
+    overflow: hidden;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Navbar e footer ficam fixos */
+nav.navbar {
+    flex-shrink: 0;
+}
+
+footer {
+    flex-shrink: 0;
+    margin-top: 0 !important;
+}
+
+/* Main ocupa espaço restante */
+main.container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 1rem 1.5rem 0 1.5rem !important;
+    max-width: 100%;
+    overflow: hidden;
+}
+
+/* Container principal */
+#jobs-page-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    max-width: 1320px;
+    margin: 0 auto;
+    width: 100%;
+    overflow: hidden;
+}
+
+/* Header fixo */
+#jobs-header {
+    flex-shrink: 0;
+    margin-bottom: 1rem;
+}
+
+/* Filtros fixos */
+#jobs-filters {
+    flex-shrink: 0;
+    margin-bottom: 1rem;
+}
+
+/* Área da tabela com scroll interno */
+#jobs-table-container {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+#jobs-table-container .table-responsive {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+/* Paginação fixa */
+#jobs-pagination {
+    flex-shrink: 0;
+    background: #fff;
+    border-top: 1px solid #dee2e6;
+    padding: 0.5rem 0;
+}
+
+/* Header da tabela sticky */
+#jobs-table-container thead {
+    position: sticky;
+    top: 0;
+    background: #f8f9fa;
+    z-index: 10;
+    box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1);
+}
+
+/* ==========================================================================
+   Scrollbar customizada (Webkit + Firefox)
+   ========================================================================== */
+
+#jobs-table-container::-webkit-scrollbar,
+#jobs-table-container .table-responsive::-webkit-scrollbar {
+    width: 8px;
+}
+
+#jobs-table-container::-webkit-scrollbar-track,
+#jobs-table-container .table-responsive::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+#jobs-table-container::-webkit-scrollbar-thumb,
+#jobs-table-container .table-responsive::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+#jobs-table-container::-webkit-scrollbar-thumb:hover,
+#jobs-table-container .table-responsive::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* Firefox */
+#jobs-table-container,
+#jobs-table-container .table-responsive {
+    scrollbar-width: thin;
+    scrollbar-color: #888 #f1f1f1;
+}
+

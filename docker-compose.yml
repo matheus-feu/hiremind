@@ -1,0 +1,44 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-hiremind}
+      POSTGRES_USER: ${POSTGRES_USER:-hiremind}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-hiremind}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-hiremind} -d ${POSTGRES_DB:-hiremind}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    ports:
+      - "5432:5432"
+
+  web:
+    build: .
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER:-hiremind}:${POSTGRES_PASSWORD:-hiremind}@db:5432/${POSTGRES_DB:-hiremind}
+      DJANGO_DEBUG: ${DJANGO_DEBUG:-False}
+      DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-*}
+      CHROMA_PERSIST_DIR: /app/.chroma
+    volumes:
+      - media_data:/app/media
+      - chroma_data:/app/.chroma
+      - static_data:/app/staticfiles
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+
+volumes:
+  postgres_data:
+  media_data:
+  chroma_data:
+  static_data:
+
