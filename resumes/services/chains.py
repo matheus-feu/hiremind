@@ -4,7 +4,7 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import Runnable, RunnableLambda
 
 from .parsers import parse_json_response
-from .prompts import analyze_prompt
+from .prompts import analysis_prompt_template
 
 
 def create_analysis_chain(llm_provider) -> Runnable:
@@ -17,7 +17,7 @@ def create_analysis_chain(llm_provider) -> Runnable:
 	except Exception:
 		pass
 
-	analysis_chain = (analyze_prompt | chat_model | StrOutputParser() | RunnableLambda(parse_json_response))
+	analysis_chain = (analysis_prompt_template | chat_model | StrOutputParser() | RunnableLambda(parse_json_response))
 	return analysis_chain
 
 

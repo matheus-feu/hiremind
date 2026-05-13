@@ -1,8 +1,8 @@
 import logging
 
 from django.contrib import messages
-from django.http import JsonResponse
-from django.shortcuts import get_object_or_404, redirect
+from django.http import JsonResponse, HttpResponse
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 from django.views.generic import (
 	CreateView, DeleteView, DetailView, ListView, TemplateView, UpdateView, View,
@@ -165,6 +165,29 @@ class ResumeUploadView(CreateView):
 	model = Resume
 	form_class = ResumeUploadForm
 	template_name = "resumes/resume_form.html"
+
+	def get_initial(self):
+		"""Pré-preenche o formulário com a vaga se vier da tela de job_detail."""
+		initial = super().get_initial()
+		job_id = self.kwargs.get('job_id')
+		if job_id:
+			try:
+				job = Job.objects.get(pk=job_id)
+				initial['job'] = job
+			except Job.DoesNotExist:
+				pass
+		return initial
+
+	def get_context_data(self, **kwargs):
+		"""Adiciona a vaga ao contexto para exibir no template."""
+		context = super().get_context_data(**kwargs)
+		job_id = self.kwargs.get('job_id')
+		if job_id:
+			try:
+				context['preselected_job'] = Job.objects.get(pk=job_id)
+			except Job.DoesNotExist:
+				pass
+		return context
 
 	def form_valid(self, form):
 		response = super().form_valid(form)

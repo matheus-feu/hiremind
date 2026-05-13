@@ -18,6 +18,7 @@ urlpatterns = [
 	# Resumes
 	path("resumes/", views.ResumeListView.as_view(), name="resume-list"),
 	path("resumes/new/", views.ResumeUploadView.as_view(), name="resume-upload"),
+	path("resumes/new/<uuid:job_id>/", views.ResumeUploadView.as_view(), name="resume-upload-for-job"),
 	path("resumes/<uuid:pk>/", views.ResumeDetailView.as_view(), name="resume-detail"),
 	path("resumes/<uuid:pk>/delete/", views.ResumeDeleteView.as_view(), name="resume-delete"),
 	path("resumes/<uuid:pk>/analyze/<uuid:job_id>/", views.RunAnalysisView.as_view(), name="resume-analyze"),

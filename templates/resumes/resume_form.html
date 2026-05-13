@@ -5,6 +5,17 @@
     <h2><i class="bi bi-upload"></i> Enviar Currículo</h2>
     <p class="text-muted">Aceitamos PDF, DOCX e TXT (até 10MB). Se selecionar uma vaga, a análise é executada
         automaticamente.</p>
+
+    {% if preselected_job %}
+        <div class="alert alert-info d-flex align-items-center" role="alert">
+            <i class="bi bi-info-circle me-2"></i>
+            <div>
+                <strong>Vaga Pré-selecionada:</strong> {{ preselected_job.title }}
+                <br><small>O currículo será automaticamente vinculado e analisado para esta vaga.</small>
+            </div>
+        </div>
+    {% endif %}
+
     <div class="card shadow-sm border-0 mt-3">
         <div class="card-body">
             <form method="post" enctype="multipart/form-data">{% csrf_token %}
